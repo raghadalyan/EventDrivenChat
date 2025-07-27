@@ -1,47 +1,66 @@
-Simple chat server implemented in C
-Authored by RAGHAD ALYAN
-324231604 
-============================================================================================================
-CLASSES :
-chatServer.c 
-===========================================================================================================
-Header File Inclusion: The code includes the necessary header files for socket programming, signal handling, memory allocation, and file descriptor manipulation.
+# EX3 – Event-Driven Chat Server in C
 
-Signal Handling: A signal handler (intHandler) is defined to catch the SIGINT signal (Ctrl+C), which sets the end_server flag to 1, indicating that the server should terminate gracefully.
+Simple multi-client chat server implemented in C using non-blocking sockets and the `select()` system call.
 
-Main Function:
+---
 
-It checks the command-line arguments to ensure that the correct number of arguments (port number) is provided.
-Initializes the connection pool (conn_pool_t) and sets up the listening socket (listen_sd) for incoming connections.
-Sets the listening socket to non-blocking mode and binds it to the specified port.
-Starts listening for incoming connections and adds the listening socket to the connection pool.
-Initializes file descriptor sets (read_set, write_set, ready_read_set, ready_write_set) and adds active connections to them.
-Enters a loop where it monitors file descriptors for read and write events using the select function.
-Handles incoming connections, reads data from clients, and writes data to clients based on the readiness of file descriptors.
-Gracefully cleans up resources (closing sockets, freeing memory) upon server termination.
-Connection Pool Functions:
+## 👩‍💻 Author
+**Raghad Alyan**  
+Student ID: 324231604  
+Azrieli College of Engineering
 
-initPool: Initializes the connection pool.
-addConn: Adds a new connection to the connection pool.
-removeConn: Removes a connection from the connection pool.
-updateMaxFd: Updates the maximum file descriptor value in the connection pool.
-removeFromPool: Removes a connection from the connection pool and frees associated memory.
-freeMessageQueue: Frees memory allocated for the message queue of a connection.
-cleanupConnection: Cleans up resources associated with a connection.
-Message Queue Functions:
+---
 
-addMsg: Adds a message to the write queue of connections in the connection pool.
-writeToClient: Writes messages from the write queue to clients.
-Overall, the code provides a basic framework for a chat server capable of handling multiple concurrent connections using non-blocking I/O and the select function for event-driven programming.
-=================================================================================================================
-==How to compile?==
-gcc -o chatServer chatServer.c
-=================================================================================================================
-==How to pass arguments?== 
-./chatServer <port>
-=================================================================================================================
-==VALGRIND?==
-gcc -g -o chatServer chatServer.c
-valgrind --leak-check=full ./chatServer
-=================================================================================================================
-RAGHAD ALYAN 
+## 📁 Files
+
+- `chatServer.c` – Core implementation (single C file)
+
+---
+
+## 🧠 Overview
+
+This project builds a **basic chat server** using:
+
+- `select()` for I/O multiplexing (no threads)
+- File descriptor sets to track client states
+- Non-blocking sockets with `ioctl()`
+- Per-connection message queues
+- Graceful exit using `SIGINT` handling
+
+---
+
+## 🧱 Architecture
+
+### ✅ **Signal Handling**
+- Listens for `SIGINT` (Ctrl+C)
+- Sets a flag to gracefully shut down the server
+
+### ✅ **Main Function Responsibilities**
+- Parse and validate command-line port
+- Initialize connection pool
+- Set up non-blocking listening socket
+- Accept and manage client connections
+- Use `select()` loop to:
+  - Accept new clients
+  - Read from clients
+  - Write queued messages
+- Clean up memory and close sockets on shutdown
+
+### ✅ **Key Functions**
+#### Connection Pool:
+- `initPool()` – Initialize pool data
+- `addConn()` / `removeConn()` – Manage client sockets
+- `updateMaxFd()` – Track max file descriptor
+- `removeFromPool()` – Free connection memory
+- `cleanupConnection()` – Close socket, clear sets
+
+#### Messaging:
+- `addMsg()` – Queue messages for clients
+- `writeToClient()` – Send messages from queue
+
+---
+
+## 🚀 How to Compile
+
+```bash
+gcc -Wall -o chatServer chatServer.c
